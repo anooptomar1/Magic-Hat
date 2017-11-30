@@ -5,6 +5,7 @@
 ![Platform iOS](https://img.shields.io/badge/nanodegree-iOS-blue.svg)
 
 Swift version: 9.1
+
 Required hardware: iPhone 6S and above
 
 This repository contains the Magic Hat app project for Udacity's Learn ARKit with Swift Nanodegree.
