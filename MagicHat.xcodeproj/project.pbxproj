@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6277EBDA1FCFEACC0027CD93 /* AlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6277EBD91FCFEACC0027CD93 /* AlertView.swift */; };
+		6277EBDC1FCFF3A80027CD93 /* SCNNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6277EBDB1FCFF3A80027CD93 /* SCNNode.swift */; };
 		62DD34141FCEA2AB00B792AF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DD34131FCEA2AB00B792AF /* AppDelegate.swift */; };
 		62DD34161FCEA2AB00B792AF /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 62DD34151FCEA2AB00B792AF /* art.scnassets */; };
 		62DD34181FCEA2AB00B792AF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DD34171FCEA2AB00B792AF /* ViewController.swift */; };
@@ -16,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6277EBD91FCFEACC0027CD93 /* AlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertView.swift; sourceTree = "<group>"; };
+		6277EBDB1FCFF3A80027CD93 /* SCNNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCNNode.swift; sourceTree = "<group>"; };
 		62DD34101FCEA2AB00B792AF /* MagicHat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MagicHat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		62DD34131FCEA2AB00B792AF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		62DD34151FCEA2AB00B792AF /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -57,11 +61,13 @@
 			isa = PBXGroup;
 			children = (
 				62DD34131FCEA2AB00B792AF /* AppDelegate.swift */,
-				62DD34151FCEA2AB00B792AF /* art.scnassets */,
 				62DD34171FCEA2AB00B792AF /* ViewController.swift */,
+				6277EBD91FCFEACC0027CD93 /* AlertView.swift */,
+				6277EBDB1FCFF3A80027CD93 /* SCNNode.swift */,
 				62DD34191FCEA2AB00B792AF /* Main.storyboard */,
-				62DD341C1FCEA2AB00B792AF /* Assets.xcassets */,
 				62DD341E1FCEA2AB00B792AF /* LaunchScreen.storyboard */,
+				62DD341C1FCEA2AB00B792AF /* Assets.xcassets */,
+				62DD34151FCEA2AB00B792AF /* art.scnassets */,
 				62DD34211FCEA2AB00B792AF /* Info.plist */,
 			);
 			path = MagicHat;
@@ -142,6 +148,8 @@
 			files = (
 				62DD34181FCEA2AB00B792AF /* ViewController.swift in Sources */,
 				62DD34141FCEA2AB00B792AF /* AppDelegate.swift in Sources */,
+				6277EBDC1FCFF3A80027CD93 /* SCNNode.swift in Sources */,
+				6277EBDA1FCFEACC0027CD93 /* AlertView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,7 +290,7 @@
 				DEVELOPMENT_TEAM = 3EV99W99UA;
 				INFOPLIST_FILE = MagicHat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jenniferliu.MagicHat;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jenniferliu.Billiards;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -297,7 +305,7 @@
 				DEVELOPMENT_TEAM = 3EV99W99UA;
 				INFOPLIST_FILE = MagicHat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jenniferliu.MagicHat;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jenniferliu.Billiards;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

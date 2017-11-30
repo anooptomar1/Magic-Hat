@@ -10,9 +10,25 @@ import UIKit
 import SceneKit
 import ARKit
 
-class ViewController: UIViewController, ARSCNViewDelegate {
+// MARK: - ViewController: UIViewController
+
+class ViewController: UIViewController {
+    
+    // MARK: Outlets
 
     @IBOutlet var sceneView: ARSCNView!
+    @IBOutlet weak var throwBallButton: UIButton!
+    @IBOutlet weak var magicButton: UIButton!
+    
+    // MARK: Properties
+    
+    private var planeAnchor: ARPlaneAnchor?
+    private var hatNode: SCNNode?
+    private var currentBallNode: SCNNode?
+    private var balls = [SCNNode]()
+    private var trackingTimer: Timer?
+    
+    // MARK: Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,20 +40,31 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.showsStatistics = true
         
         // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        let scene = SCNScene()
         
         // Set the scene to the view
         sceneView.scene = scene
+        
+        // Show instruction
+        AlertView.showAlert(controller: self, message: AlertView.Messages.instruction)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        // Create a session configuration
-        let configuration = ARWorldTrackingConfiguration()
-
-        // Run the view's session
-        sceneView.session.run(configuration)
+        // Check if the device supports ARWorldTrackingConfiguration
+        if ARWorldTrackingConfiguration.isSupported {
+            let configuration = ARWorldTrackingConfiguration()
+            
+            // Enable plane detection
+            configuration.planeDetection = .horizontal
+            
+            sceneView.session.run(configuration)
+            
+        } else {
+            let configuration = AROrientationTrackingConfiguration()
+            sceneView.session.run(configuration)
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -47,34 +74,117 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Release any cached data, images, etc that aren't in use.
-    }
-
-    // MARK: - ARSCNViewDelegate
+    // MARK: Actions
     
-/*
-    // Override to create and configure nodes for anchors added to the view's session.
-    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
-     
-        return node
+    @IBAction func throwBall(_ sender: Any) {
+        
+        // Create ball
+        let ball = SCNSphere(radius: 0.02)
+        currentBallNode = SCNNode(geometry: ball)
+        currentBallNode?.physicsBody = .dynamic()
+        
+        // Apply transformation
+        let camera = sceneView.session.currentFrame?.camera
+        let cameraTransform = camera?.transform
+        currentBallNode?.simdTransform = cameraTransform!
+        
+        // Add current ball node to balls array
+        balls.append(currentBallNode!)
+        
+        // Add ball node to root node
+        sceneView.scene.rootNode.addChildNode(currentBallNode!)
+        
+        // Set force to be applied
+        let force = simd_make_float4(0, 0, -3, 0)
+        let rotatedForce = simd_mul(cameraTransform!, force)
+        let vectorForce = SCNVector3(x:rotatedForce.x, y:rotatedForce.y, z:rotatedForce.z)
+        
+        // Apply force to ball
+        currentBallNode?.physicsBody?.applyForce(vectorForce, asImpulse: true)
     }
-*/
+ 
+    @IBAction func magic(_ sender: Any) {
+        guard let hatNode = hatNode?.presentation else { return }
+        
+        for ball in balls {
+            if hatNode.boundingBoxContains(point: ball.presentation.position) {
+                ball.removeFromParentNode()
+            }
+        }
+        
+        // Add sparkles animation
+        let hat = sceneView.scene.rootNode.childNode(withName: "hat", recursively: true)
+        let sparkles = SCNParticleSystem(named: "art.scnassets/Sparkles", inDirectory: nil)
+        hat?.addParticleSystem(sparkles!)
+    }
+}
+
+// MARK: - ViewController: ARSCNViewDelegate
+
+extension ViewController: ARSCNViewDelegate {
+
+    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
+        
+        // Create hat node for a detected ARPlaneAnchor
+        guard let planeAnchor = anchor as? ARPlaneAnchor, hatNode == nil else { return nil }
+        
+        self.planeAnchor = planeAnchor
+        let position = SCNVector3Make(anchor.transform.columns.3.x, anchor.transform.columns.3.y, anchor.transform.columns.3.z)
+        hatNode = createMagicHatFromScene(position)
+        
+        return hatNode
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        if let lightEstimate = sceneView.session.currentFrame?.lightEstimate {
+            hatNode?.light?.intensity = lightEstimate.ambientIntensity
+            balls.forEach { $0.light?.intensity = lightEstimate.ambientIntensity }
+        }
+    }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
-        // Present an error message to the user
+        AlertView.showAlert(controller: self, message: AlertView.Messages.sessionFailed)
+    }
+    
+    func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera) {
         
+        switch camera.trackingState {
+        case .notAvailable:
+            AlertView.showAlert(controller: self, message: AlertView.Messages.cameraTrackingError)
+            break
+        case .limited:
+            trackingTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false, block: { _ in
+                session.run(AROrientationTrackingConfiguration())
+                self.trackingTimer?.invalidate()
+                self.trackingTimer = nil
+            })
+        case .normal:
+            if trackingTimer != nil {
+                trackingTimer!.invalidate()
+                trackingTimer = nil
+            }
+        }
     }
     
     func sessionWasInterrupted(_ session: ARSession) {
-        // Inform the user that the session has been interrupted, for example, by presenting an overlay
-        
+        AlertView.showAlert(controller: self, message: AlertView.Messages.sessionInterrupted)
     }
     
-    func sessionInterruptionEnded(_ session: ARSession) {
-        // Reset tracking and/or remove existing anchors if consistent tracking is required
+    // MARK: Helpers
+    
+    private func createMagicHatFromScene(_ position: SCNVector3) -> SCNNode? {
+        guard let url = Bundle.main.url(forResource: "art.scnassets/magicHat", withExtension: "scn") else {
+            print("Could not find magic hat scene")
+            return nil
+        }
         
+        guard let node = SCNReferenceNode(url: url) else { return nil }
+        
+        node.load()
+        
+        // Position scene
+        node.position = position
+        
+        return node
     }
 }
