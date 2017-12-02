@@ -81,7 +81,9 @@ class ViewController: UIViewController {
         // Create ball
         let ball = SCNSphere(radius: 0.02)
         currentBallNode = SCNNode(geometry: ball)
-        currentBallNode?.physicsBody = .dynamic()
+        currentBallNode?.physicsBody?.type = .dynamic
+        currentBallNode?.physicsBody?.isAffectedByGravity = true
+        currentBallNode?.physicsBody?.allowsResting = true
         
         // Apply transformation
         let camera = sceneView.session.currentFrame?.camera
