@@ -109,6 +109,8 @@ class ViewController: UIViewController {
         guard let hatNode = hatNode?.presentation else { return }
         
         for ball in balls {
+    
+            // Delete balls in the hat
             if hatNode.boundingBoxContains(point: ball.presentation.position) {
                 ball.removeFromParentNode()
             }
@@ -147,6 +149,8 @@ extension ViewController: ARSCNViewDelegate {
     }
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        
+        // Adjust hat and balls' lighting to match with the light detected
         if let lightEstimate = sceneView.session.currentFrame?.lightEstimate {
             hatNode?.light?.intensity = lightEstimate.ambientIntensity
             balls.forEach { $0.light?.intensity = lightEstimate.ambientIntensity }
