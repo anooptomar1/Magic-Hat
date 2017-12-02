@@ -23,12 +23,6 @@ class ViewController: UIViewController {
     // MARK: Properties
     
     private var planeAnchor: ARPlaneAnchor?
-//    private var hatFloorNode: SCNNode {
-//        let node = SCNNode()
-//        node.physicsBody = SCNPhysicsBody.dynamic()
-//        sceneView.scene.rootNode.addChildNode(node)
-//        return node
-//    }
     private var hatNode: SCNNode?
     private var currentBallNode: SCNNode?
     private var balls = [SCNNode]()
@@ -99,7 +93,7 @@ class ViewController: UIViewController {
         // Add current ball node to balls array
         balls.append(currentBallNode!)
         
-        // Add ball node to root node
+        // Add ball to the scene
         sceneView.scene.rootNode.addChildNode(currentBallNode!)
         
         // Set force to be applied
@@ -143,12 +137,14 @@ extension ViewController: ARSCNViewDelegate {
         return hatNode
     }
     
-//    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-//        guard let planeAnchor = anchor as? ARPlaneAnchor, planeAnchor.center == self.planeAnchor?.center || self.planeAnchor == nil else { return }
-//
-//        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.y))
-//        hatFloorNode.geometry = plane
-//    }
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        guard let planeAnchor = anchor as? ARPlaneAnchor, planeAnchor.center == self.planeAnchor?.center || self.planeAnchor == nil else { return }
+
+        // Set the floor's geometry to be the detected plane
+        let floor = sceneView.scene.rootNode.childNode(withName: "floor", recursively: true)
+        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.y))
+        floor?.geometry = plane
+    }
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         if let lightEstimate = sceneView.session.currentFrame?.lightEstimate {
