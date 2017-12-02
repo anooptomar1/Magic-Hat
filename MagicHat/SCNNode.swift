@@ -12,11 +12,6 @@ import ARKit
 
 extension SCNNode {
     
-    func boundingBoxContains(point: SCNVector3, in node: SCNNode) -> Bool {
-        let localPoint = convertPosition(point, from: node)
-        return boundingBoxContains(point: localPoint)
-    }
-    
     func boundingBoxContains(point: SCNVector3) -> Bool {
         return BoundingBox(boundingBox).contains(point)
     }
