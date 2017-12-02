@@ -116,7 +116,7 @@ class ViewController: UIViewController {
         
         // Add sparkles animation
         let hat = sceneView.scene.rootNode.childNode(withName: "hat", recursively: true)
-        let sparkles = SCNParticleSystem(named: "art.scnassets/Sparkles", inDirectory: nil)
+        let sparkles = SCNParticleSystem(named: "Sparkles.scnp", inDirectory: "art.scnassets")
         hat?.addParticleSystem(sparkles!)
     }
 }
@@ -136,6 +136,13 @@ extension ViewController: ARSCNViewDelegate {
         
         return hatNode
     }
+    
+    //    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+    //        guard let planeAnchor = anchor as? ARPlaneAnchor, planeAnchor.center == self.planeAnchor?.center || self.planeAnchor == nil else { return }
+    //
+    //        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.y))
+    //        hatFloorNode.geometry = plane
+    //    }
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         if let lightEstimate = sceneView.session.currentFrame?.lightEstimate {
