@@ -24,6 +24,7 @@ class ViewController: UIViewController {
     
     private var planeAnchor: ARPlaneAnchor?
     private var hatNode: SCNNode?
+    private var tubeNode: SCNNode?
     private var currentBallNode: SCNNode?
     private var balls = [SCNNode]()
     private var trackingTimer: Timer?
@@ -106,12 +107,11 @@ class ViewController: UIViewController {
     }
  
     @IBAction func magic(_ sender: Any) {
-        guard let hatNode = hatNode?.presentation else { return }
         
         for ball in balls {
     
             // Delete balls in the hat
-            if hatNode.boundingBoxContains(point: ball.presentation.position) {
+            if hatBoundingBoxContains(ball) {
                 ball.removeFromParentNode()
             }
         }
@@ -120,6 +120,35 @@ class ViewController: UIViewController {
         let hat = sceneView.scene.rootNode.childNode(withName: "hat", recursively: true)
         let sparkles = SCNParticleSystem(named: "Sparkles.scnp", inDirectory: "art.scnassets")
         hat?.addParticleSystem(sparkles!)
+    }
+    
+    // MARK: Helpers
+    
+    func hatBoundingBoxContains(_ node: SCNNode) -> Bool {
+        // Recursive check, to get the boolean results at real time
+        return self.hatBoundingBoxContains(node.presentation.worldPosition)
+    }
+    
+    func hatBoundingBoxContains(_ point: SCNVector3) -> Bool {
+        
+        // Get the tube node of the hat
+        let tubeNode = hatNode?.childNode(withName: "tube", recursively: true)
+
+        // Initialize both the max and min information for the hat tube at once
+        var (min, max) = (tubeNode?.presentation.boundingBox)!
+        
+        let size = max - min
+        min = SCNVector3((tubeNode?.presentation.worldPosition.x)! - size.x/2, (tubeNode?.presentation.worldPosition.y)!, (tubeNode?.presentation.worldPosition.z)! - size.z/2)
+        max = SCNVector3((tubeNode?.presentation.worldPosition.x)! + size.x/2, (tubeNode?.presentation.worldPosition.y)! + size.y, (tubeNode?.presentation.worldPosition.z)! + size.z/2)
+        
+        return
+            point.x >= min.x  &&
+                point.y >= min.y  &&
+                point.z >= min.z  &&
+                
+                point.x < max.x  &&
+                point.y < max.y  &&
+                point.z < max.z
     }
 }
 
