@@ -24,7 +24,6 @@ class ViewController: UIViewController {
     
     private var planeAnchor: ARPlaneAnchor?
     private var hatNode: SCNNode?
-    private var tubeNode: SCNNode?
     private var currentBallNode: SCNNode?
     private var balls = [SCNNode]()
     private var trackingTimer: Timer?
@@ -36,9 +35,6 @@ class ViewController: UIViewController {
         
         // Set the view's delegate
         sceneView.delegate = self
-        
-        // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
         
         // Create a new scene
         let scene = SCNScene()
@@ -140,8 +136,12 @@ class ViewController: UIViewController {
         var (min, max) = (tubeNode?.presentation.boundingBox)!
         
         let size = max - min
-        min = SCNVector3((tubeNode?.presentation.worldPosition.x)! - size.x/2, (tubeNode?.presentation.worldPosition.y)!, (tubeNode?.presentation.worldPosition.z)! - size.z/2)
-        max = SCNVector3((tubeNode?.presentation.worldPosition.x)! + size.x/2, (tubeNode?.presentation.worldPosition.y)! + size.y, (tubeNode?.presentation.worldPosition.z)! + size.z/2)
+        min = SCNVector3((tubeNode?.presentation.worldPosition.x)! - size.x/2,
+                         (tubeNode?.presentation.worldPosition.y)!,
+                         (tubeNode?.presentation.worldPosition.z)! - size.z/2)
+        max = SCNVector3((tubeNode?.presentation.worldPosition.x)! + size.x/2,
+                         (tubeNode?.presentation.worldPosition.y)! + size.y,
+                         (tubeNode?.presentation.worldPosition.z)! + size.z/2)
         
         return
             point.x >= min.x  &&
@@ -157,26 +157,57 @@ class ViewController: UIViewController {
 // MARK: - ViewController: ARSCNViewDelegate
 
 extension ViewController: ARSCNViewDelegate {
-
-    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        
-        // Create hat node for a detected ARPlaneAnchor
-        guard let planeAnchor = anchor as? ARPlaneAnchor, hatNode == nil else { return nil }
-        
-        self.planeAnchor = planeAnchor
-        let position = SCNVector3Make(anchor.transform.columns.3.x, anchor.transform.columns.3.y, anchor.transform.columns.3.z)
-        hatNode = createMagicHatFromScene(position)
-        
-        return hatNode
-    }
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        guard let planeAnchor = anchor as? ARPlaneAnchor, planeAnchor.center == self.planeAnchor?.center || self.planeAnchor == nil else { return }
+        guard let planeAnchor = anchor as? ARPlaneAnchor, hatNode == nil else { return }
+        
+        // Extend the plane for the balls to be able to land on the floor
+        let planeExtension: CGFloat = 10
+        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x) * planeExtension,
+                             height: CGFloat(planeAnchor.extent.z) * planeExtension)
+        
+//        // Add plane color for debugging purposes
+//        let planeMaterial = SCNMaterial()
+//        planeMaterial.diffuse.contents = UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 0.8)
+//        plane.materials = [planeMaterial]
 
-        // Set the floor's geometry to be the detected plane
-        let floor = sceneView.scene.rootNode.childNode(withName: "floor", recursively: true)
-        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.y))
-        floor?.geometry = plane
+        // Create floor plane as a node
+        let planeNode = SCNNode(geometry: plane)
+        
+        // Position floor plane
+        planeNode.position = SCNVector3Make(0, 0, 0)
+        planeNode.transform = SCNMatrix4MakeRotation(-Float.pi/2, 1, 0, 0) // Rotate plane 90 degrees to be parallel to the floor
+        
+        // Add physics to the floor
+        planeNode.physicsBody = SCNPhysicsBody(type: .static, shape: nil)
+        
+        // Add floor plane to the scene
+        node.addChildNode(planeNode)
+        
+        // Position hat on the floor plane
+        let position = SCNVector3Make(planeAnchor.center.x, 0, planeAnchor.center.z)
+        createMagicHatFromScene(position, node: node)
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        
+        // Update plane anchors and nodes matching the setup in 'renderer(_:didAdd:for:)'
+        guard let planeAnchor = anchor as?  ARPlaneAnchor,
+            let planeNode = node.childNodes.first,
+            let plane = planeNode.geometry as? SCNPlane
+            else { return }
+        
+        // Plane estimation may shift the center of a plane relative to its anchor's transformation
+        planeNode.simdPosition = float3(planeAnchor.center.x, 0, planeAnchor.center.z)
+        
+        /*
+         Plane estimation may extend the size of the plane, or combine previously detected
+         planes into a larger one. In the latter case, 'ARSCNView' automatically deletes the
+         corresponding node for one plane, then calls this method to update the size of
+         the remaining plane.
+         */
+        plane.width = CGFloat(planeAnchor.extent.x)
+        plane.height = CGFloat(planeAnchor.extent.z)
     }
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
@@ -218,19 +249,15 @@ extension ViewController: ARSCNViewDelegate {
     
     // MARK: Helpers
     
-    private func createMagicHatFromScene(_ position: SCNVector3) -> SCNNode? {
-        guard let url = Bundle.main.url(forResource: "art.scnassets/magicHat", withExtension: "scn") else {
-            print("Could not find magic hat scene")
-            return nil
+    private func createMagicHatFromScene(_ position: SCNVector3, node : SCNNode) {
+        guard let scene = SCNScene(named: "magicHat.scn", inDirectory: "art.scnassets") else {
+            fatalError("Unable to find scene")
         }
         
-        guard let node = SCNReferenceNode(url: url) else { return nil }
-        
-        node.load()
+        hatNode = scene.rootNode.childNode(withName: "hat", recursively: true)
         
         // Position scene
-        node.position = position
-        
-        return node
+        hatNode?.position = position
+        node.addChildNode(hatNode!)
     }
 }
