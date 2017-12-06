@@ -165,14 +165,10 @@ extension ViewController: ARSCNViewDelegate {
         let planeExtension: CGFloat = 10
         let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x) * planeExtension,
                              height: CGFloat(planeAnchor.extent.z) * planeExtension)
-        
-//        // Add plane color for debugging purposes
-//        let planeMaterial = SCNMaterial()
-//        planeMaterial.diffuse.contents = UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 0.8)
-//        plane.materials = [planeMaterial]
 
         // Create floor plane as a node
         let planeNode = SCNNode(geometry: plane)
+        planeNode.opacity = 0
         
         // Position floor plane
         planeNode.position = SCNVector3Make(0, 0, 0)
