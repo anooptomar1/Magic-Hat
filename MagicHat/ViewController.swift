@@ -83,6 +83,8 @@ class ViewController: UIViewController {
         let ball = SCNSphere(radius: 0.02)
         currentBallNode = SCNNode(geometry: ball)
         currentBallNode?.physicsBody = .dynamic()
+        currentBallNode?.physicsBody?.friction = 0.5
+        currentBallNode?.physicsBody?.rollingFriction = 0.6
         currentBallNode?.physicsBody?.allowsResting = true
         currentBallNode?.physicsBody?.isAffectedByGravity = true
         
