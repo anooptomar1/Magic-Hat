@@ -19,3 +19,6 @@ Instructions on how to use the app:
 1. Aim the camera at the floor and move around until the magic hat appears.
 2. Aim at the camera at the hat and press "Throw Ball" button to throw a ball.
 3. Once there is at least one ball inside the hat, press "Magic" button to make the balls disappear.
+
+
+This project was completed with some reference to https://github.com/joshnewnham/UdacityARKitWithSwift
