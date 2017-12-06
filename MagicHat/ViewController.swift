@@ -124,7 +124,7 @@ class ViewController: UIViewController {
     
     func hatBoundingBoxContains(_ node: SCNNode) -> Bool {
         // Recursive check, to get the boolean results at real time
-        return self.hatBoundingBoxContains(node.presentation.worldPosition)
+        return hatBoundingBoxContains(node.position)
     }
     
     func hatBoundingBoxContains(_ point: SCNVector3) -> Bool {
@@ -142,7 +142,7 @@ class ViewController: UIViewController {
         max = SCNVector3((tubeNode?.presentation.worldPosition.x)! + size.x/2,
                          (tubeNode?.presentation.worldPosition.y)! + size.y,
                          (tubeNode?.presentation.worldPosition.z)! + size.z/2)
-        
+        print (min, max)
         return
             point.x >= min.x  &&
                 point.y >= min.y  &&
