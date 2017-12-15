@@ -27,6 +27,7 @@ class ViewController: UIViewController {
     private var currentBallNode: SCNNode?
     private var balls = [SCNNode]()
     private var trackingTimer: Timer?
+    private var magicEnabled = false
     
     // MARK: Life Cycle
     
@@ -106,11 +107,12 @@ class ViewController: UIViewController {
  
     @IBAction func magic(_ sender: Any) {
         
+        // Toggle magicEnabled
+        magicEnabled = !magicEnabled
+        
         for ball in balls {
-    
-            // Delete balls in the hat
             if hatBoundingBoxContains(ball) {
-                ball.removeFromParentNode()
+                ball.isHidden = magicEnabled
             }
         }
         
@@ -142,7 +144,7 @@ class ViewController: UIViewController {
         max = SCNVector3((tubeNode?.presentation.worldPosition.x)! + size.x/2,
                          (tubeNode?.presentation.worldPosition.y)! + size.y,
                          (tubeNode?.presentation.worldPosition.z)! + size.z/2)
-        print (min, max)
+
         return
             point.x >= min.x  &&
                 point.y >= min.y  &&
