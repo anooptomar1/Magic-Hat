@@ -162,7 +162,7 @@ extension ViewController: ARSCNViewDelegate {
         guard let planeAnchor = anchor as? ARPlaneAnchor, hatNode == nil else { return }
         
         // Extend the plane for the balls to be able to land on the floor
-        let planeExtension: CGFloat = 10
+        let planeExtension: CGFloat = 50
         let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x) * planeExtension,
                              height: CGFloat(planeAnchor.extent.z) * planeExtension)
 
